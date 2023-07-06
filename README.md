@@ -45,16 +45,25 @@ For your convienience, a function to install [HtmlAgilityPack](https://html-agil
 Super easy, you provide port and the protocol. You can pass ```BOTH``` as protocol. In which case, you receive 2 results objects in the *Port* property.
 
 ```
-    # Checking port 80 on TCP
-    Test-FirewallPort -Port 80 -Protocol TCP
+    # Checking port 8088 on TCP and UDP
 
-    Start-Sleep 5  # Server limits request rate
+    Write-Host "Testing Port 8088 UDP"
 
-    # Checking port 1194 on TCP and UDP
-    Test-FirewallPort -Port 1194 -Protocol BOTH 
+    $Results = Request-OnlinePortScan -Port 8088 -Protocol BOTH
 
-    # Port 64 on UDP
-    Test-FirewallPort -Port 64 -Protocol UDP
+    ForEach($res in $Results.Ports){
+        $Port   = $res.Port
+        $Protocol = $res.Protocol
+        $Status   = $res.Status
+        $col = 'Yellow'
+        switch($Status){
+            { $_ -match 'open'     }   { $col = 'Red' }
+            { $_ -match 'closed'   }   { $col = 'Green' }
+            { $_ -match 'filtered' }   { $col = 'Yellow' }
+        }
+        $PortStr = "{0} {1} : {2}" -f $Port, $Protocol, $Status
+        Write-Host "$PortStr" -f $col
+    }
 ```
 
 ### Returned Results Format
